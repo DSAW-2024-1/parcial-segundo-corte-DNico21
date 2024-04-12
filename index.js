@@ -131,13 +131,7 @@ app.use(express.json());
 //===============================================================================================================================
 //"creación" de usuarios
 app.post("/users", (req, res) => {
-  const {
-    name,
-    lastName,
-    email,
-    city = "Bogotá",
-    country = "Colombia",
-  } = req.body;
+  const { name, lastName, email, city, country } = req.body;
   const correoRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   // Verificar si el cuerpo de la solicitud está vacío o no contiene los campos necesarios
@@ -147,30 +141,28 @@ app.post("/users", (req, res) => {
 
   // Validar el formato del correo electrónico
   if (!correoRegex.test(email)) {
-    return res
-      .status(400)
-      .json({ error: "El formato del correo electrónico no es válido - EJEMPLO: pepito@example.com" });
+    return res.status(400).json({ error: "El formato del correo electrónico no es válido - EJEMPLO: pepito@example.com" });
   }
-  //Expresión regular para validar direcciones de correo electrónico.
 
-  // Patrón:
-  // ^               - Coincide con el inicio de la cadena.
-  // [^\s@]+         - Coincide con uno o más caracteres que no sean espacios en blanco (\s) ni el símbolo '@'.
-  // @               - Coincide literalmente con el símbolo '@'.
-  // [^\s@]+         - Coincide con uno o más caracteres que no sean espacios en blanco ni el símbolo '@'.
-  // \.              - Coincide literalmente con el punto ('.'). El punto se escapa con '\' para coincidir con un punto literal.
-  // [^\s@]+         - Coincide con uno o más caracteres que no sean espacios en blanco ni el símbolo '@'.
-  // $               - Coincide con el final de la cadena.
+  if (!name.trim() || !lastName.trim() || !email.trim()) {
+    return res.status(400).json({ error: 'Faltan parámetros obligatorios' });
+  }
 
-  // Esta expresión regula y valida si una cadena tiene el formato básico de una dirección de correo electrónico.
+  const isNameValid = name.trim() !== '';
+  const isLastNameValid = lastName.trim() !== '';
 
-  // Crear el objeto de usuario
+  // Verificar si city es una cadena vacía o consiste solo de espacios en blanco
+  const isCityValid = city && city.trim() !== '';
+
+  // Verificar si country es una cadena vacía o consiste solo de espacios en blanco
+  const isCountryValid = country && country.trim() !== '';
+
   const usuario = {
-    name,
-    lastName,
+    name: isNameValid ? name.trim() : '',
+    lastName: isLastNameValid ? lastName.trim() : '',
     email,
-    city,
-    country,
+    city: isCityValid ? city.trim() : "Bogotá",
+    country: isCountryValid ? country.trim() : "Colombia"
   };
 
   // Simular la creación del usuario y retornar la información
